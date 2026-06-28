@@ -320,6 +320,98 @@ future = system.analytics.forecastHolt(tagData, "Temperature", 12, "1h", 0.5, 0.
 
 ---
 
+## Machine learning
+
+These functions require the SMILE library (bundled in the module — no extra installation). Missing values in the feature columns will cause errors; use `dropNulls` or `fillNulls` to clean the data first.
+
+### `cluster(dataset, columns, k)`
+
+Partition rows into `k` groups using K-Means. Each row is assigned to the nearest cluster centroid in the feature space defined by `columns`. Useful for discovering operating modes, process states, or product families in historical data.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `dataset` | Dataset | Source data |
+| `columns` | String[] | Numeric feature columns to cluster on |
+| `k` | Integer | Number of clusters |
+
+**Returns:** Dataset with the original columns plus an integer column named `cluster` (values 0 to k−1).
+
+```python
+# Discover operating modes from two process variables
+tagData = system.tag.queryTagHistory(
+    paths=["[default]Reactor/Temperature", "[default]Reactor/Pressure"],
+    startDate=system.date.addHours(system.date.now(), -168),
+    endDate=system.date.now(),
+    returnSize=0
+)
+
+hourly = system.analytics.resample(tagData, "1h", "mean")
+clean  = system.analytics.dropNulls(hourly)
+
+# Find 3 operating clusters
+clustered = system.analytics.cluster(clean, ["Temperature", "Pressure"], 3)
+# clustered now has a "cluster" column with values 0, 1, or 2
+
+# Count rows in each cluster
+for mode in range(3):
+    count = sum(1 for r in range(clustered.rowCount)
+                if clustered.getValueAt(r, "cluster") == mode)
+    print("Mode %d: %d hours" % (mode, count))
+```
+
+**When to use:** When you want to segment data into distinct groups without prior knowledge of the groups. K-Means finds natural clusters in multi-dimensional sensor space — for example, identifying low/medium/high production states from temperature + pressure + flow rate.
+
+---
+
+### `pca(dataset, columns, nComponents)`
+
+Reduce the dimensionality of the feature columns using Principal Component Analysis. The returned principal components (PC_1, PC_2, …) are linear combinations of the input features that capture the most variance in the data.
+
+Input columns are standardized to mean=0 / unit variance before decomposition, so columns with different physical units (°C, bar, L/min) are treated equally.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `dataset` | Dataset | Source data |
+| `columns` | String[] | Numeric feature columns to decompose |
+| `nComponents` | Integer | Number of principal components to retain (1 ≤ n ≤ len(columns)) |
+
+**Returns:** Dataset with the original columns plus `nComponents` new `DoubleColumn`s named `PC_1`, `PC_2`, …, `PC_n`.
+
+```python
+# Compress 5 correlated sensor readings into 2 principal components
+tagData = system.tag.queryTagHistory(
+    paths=[
+        "[default]Compressor/Suction_Temp",
+        "[default]Compressor/Discharge_Temp",
+        "[default]Compressor/Suction_Pressure",
+        "[default]Compressor/Discharge_Pressure",
+        "[default]Compressor/Vibration",
+    ],
+    startDate=system.date.addHours(system.date.now(), -24),
+    endDate=system.date.now(),
+    returnSize=0
+)
+
+clean = system.analytics.dropNulls(tagData)
+
+reduced = system.analytics.pca(
+    clean,
+    ["Suction_Temp", "Discharge_Temp", "Suction_Pressure", "Discharge_Pressure", "Vibration"],
+    2
+)
+# reduced has PC_1 and PC_2 columns — plot these to visualize the operating envelope
+
+# Feed the reduced data into K-Means for mode detection
+clustered = system.analytics.cluster(reduced, ["PC_1", "PC_2"], 3)
+```
+
+**When to use:** When you have many correlated sensor tags and want to:
+- Reduce noise by keeping only the dominant variance directions
+- Visualize high-dimensional data in 2D (PC_1 vs PC_2)
+- Pre-process data before clustering (PCA + K-Means is a classic combination)
+
+---
+
 ## Export
 
 ### `toCSV(dataset)`

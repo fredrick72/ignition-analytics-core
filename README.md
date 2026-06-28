@@ -19,6 +19,7 @@ Ignition's scripting engine runs Jython (Python 2.7 on the JVM). This makes it i
 | **Normalization** | `normalize` — min-max or z-score |
 | **Anomaly detection** | `detectAnomaliesZScore`, `detectAnomaliesIQR`, `detectAnomaliesEWMA` |
 | **Forecasting** | `forecast` (Holt), `forecastLinear`, `forecastHolt` |
+| **Machine learning** | `cluster` (K-Means), `pca` (Principal Component Analysis) |
 | **Export** | `toCSV`, `toJSON` |
 | **Introspection** | `shape`, `columnNames` |
 
@@ -131,6 +132,7 @@ See [docs/scripting-api.md](docs/scripting-api.md) for the full function referen
 |---|---|---|---|
 | [Tablesaw](https://github.com/jtablesaw/tablesaw) | 0.43.1 | Apache 2.0 | DataFrame operations |
 | [Apache Commons Math](https://commons.apache.org/proper/commons-math/) | 3.6.1 | Apache 2.0 | Statistics, regression |
+| [SMILE](https://haifengl.github.io/) | 2.6.0 | Apache 2.0 | K-Means clustering, PCA |
 
 ## License
 

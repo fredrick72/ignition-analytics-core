@@ -15,4 +15,5 @@ dependencies {
     // Gateway, Designer, and Client JVMs.
     modlImplementation("tech.tablesaw:tablesaw-core:0.43.1")
     modlImplementation("org.apache.commons:commons-math3:3.6.1")
+    modlImplementation("com.github.haifengl:smile-core:2.6.0")
 }

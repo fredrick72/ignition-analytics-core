@@ -3,6 +3,7 @@ package dev.ignition.analytics.gateway.scripting;
 import com.inductiveautomation.ignition.common.Dataset;
 import dev.ignition.analytics.gateway.anomaly.AnomalyDetector;
 import dev.ignition.analytics.gateway.forecast.Forecaster;
+import dev.ignition.analytics.gateway.ml.MLEngine;
 import dev.ignition.analytics.gateway.stats.StatisticsEngine;
 import dev.ignition.analytics.gateway.timeseries.TimeSeriesAnalyzer;
 import dev.ignition.analytics.gateway.util.DatasetConverter;
@@ -256,6 +257,47 @@ public class AnalyticsScriptModule {
     ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = Forecaster.holt(table, column, periods, intervalStr, alpha, beta);
+        return DatasetConverter.toDataset(result);
+    }
+
+    // =========================================================================
+    // Machine learning
+    // =========================================================================
+
+    /**
+     * Cluster rows into {@code k} groups using K-Means.
+     * Appends an integer column named "cluster" (values 0 to k−1).
+     *
+     * <p>All specified columns must be numeric. Remove or fill missing values
+     * with {@code system.analytics.dropNulls} / {@code fillNulls} before calling.
+     *
+     * @param dataset Ignition Dataset
+     * @param columns feature columns to cluster on (e.g. ["Temperature", "Pressure"])
+     * @param k       number of clusters
+     * @return Dataset with the original columns plus a "cluster" integer column
+     */
+    public Dataset cluster(Dataset dataset, String[] columns, int k) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = MLEngine.kmeans(table, columns, k);
+        return DatasetConverter.toDataset(result);
+    }
+
+    /**
+     * Reduce dimensionality using Principal Component Analysis (PCA).
+     * Appends {@code nComponents} new columns named "PC_1", "PC_2", … "PC_n"
+     * that capture the directions of maximum variance across the feature columns.
+     *
+     * <p>Input columns are standardized (mean=0, unit variance) before
+     * decomposition, so columns with different units are treated equally.
+     *
+     * @param dataset     Ignition Dataset
+     * @param columns     feature columns to decompose (must all be numeric)
+     * @param nComponents number of principal components to retain (1 ≤ n ≤ columns.length)
+     * @return Dataset with original columns plus "PC_1" … "PC_n" columns
+     */
+    public Dataset pca(Dataset dataset, String[] columns, int nComponents) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = MLEngine.pca(table, columns, nComponents);
         return DatasetConverter.toDataset(result);
     }
 
