@@ -1,0 +1,112 @@
+{
+    "moduleId": "dev.ignition.analytics",
+    "moduleName": "Ignition Analytics",
+    "moduleDescription": "Modern data analytics for Ignition: time series, statistics, anomaly detection, and forecasting.",
+    "version": "0.1.0",
+    "checksum": {
+        "checksum": "d2d955a59e731f0f2dca302da33b651f10e17ee8e2e156669e9e8b956f8670e0",
+        "algorithm": "SHA256"
+    },
+    "fileName": "ignition-analytics.unsigned.modl",
+    "fileSize": 35560402,
+    "artifacts": {
+        ":common": {
+            "projectPath": ":common",
+            "projectName": "common",
+            "scope": "CDG",
+            "artifacts": [
+                {
+                    "id": "tablesaw-core-0.43.1.jar (tech.tablesaw:tablesaw-core:0.43.1)",
+                    "jarName": "tablesaw-core-0.43.1.jar"
+                },
+                {
+                    "id": "commons-math3-3.6.1.jar (org.apache.commons:commons-math3:3.6.1)",
+                    "jarName": "commons-math3-3.6.1.jar"
+                },
+                {
+                    "id": "guava-30.0-jre.jar (com.google.guava:guava:30.0-jre)",
+                    "jarName": "guava-30.0-jre.jar"
+                },
+                {
+                    "id": "fastutil-8.3.0.jar (it.unimi.dsi:fastutil:8.3.0)",
+                    "jarName": "fastutil-8.3.0.jar"
+                },
+                {
+                    "id": "RoaringBitmap-0.9.25.jar (org.roaringbitmap:RoaringBitmap:0.9.25)",
+                    "jarName": "RoaringBitmap-0.9.25.jar"
+                },
+                {
+                    "id": "univocity-parsers-2.8.4.jar (com.univocity:univocity-parsers:2.8.4)",
+                    "jarName": "univocity-parsers-2.8.4.jar"
+                },
+                {
+                    "id": "icu4j-65.1.jar (com.ibm.icu:icu4j:65.1)",
+                    "jarName": "icu4j-65.1.jar"
+                },
+                {
+                    "id": "classgraph-4.8.60.jar (io.github.classgraph:classgraph:4.8.60)",
+                    "jarName": "classgraph-4.8.60.jar"
+                },
+                {
+                    "id": "slf4j-api-1.7.30.jar (org.slf4j:slf4j-api:1.7.30)",
+                    "jarName": "slf4j-api-1.7.30.jar"
+                },
+                {
+                    "id": "failureaccess-1.0.1.jar (com.google.guava:failureaccess:1.0.1)",
+                    "jarName": "failureaccess-1.0.1.jar"
+                },
+                {
+                    "id": "listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar (com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava)",
+                    "jarName": "listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar"
+                },
+                {
+                    "id": "jsr305-3.0.2.jar (com.google.code.findbugs:jsr305:3.0.2)",
+                    "jarName": "jsr305-3.0.2.jar"
+                },
+                {
+                    "id": "checker-qual-3.5.0.jar (org.checkerframework:checker-qual:3.5.0)",
+                    "jarName": "checker-qual-3.5.0.jar"
+                },
+                {
+                    "id": "error_prone_annotations-2.3.4.jar (com.google.errorprone:error_prone_annotations:2.3.4)",
+                    "jarName": "error_prone_annotations-2.3.4.jar"
+                },
+                {
+                    "id": "j2objc-annotations-1.3.jar (com.google.j2objc:j2objc-annotations:1.3)",
+                    "jarName": "j2objc-annotations-1.3.jar"
+                },
+                {
+                    "id": "shims-0.9.25.jar (org.roaringbitmap:shims:0.9.25)",
+                    "jarName": "shims-0.9.25.jar"
+                },
+                {
+                    "id": "dev.ignition.analytics:common:0.1.0",
+                    "jarName": "common-0.1.0.jar"
+                }
+            ]
+        },
+        ":designer": {
+            "projectPath": ":designer",
+            "projectName": "designer",
+            "scope": "D",
+            "artifacts": [
+                {
+                    "id": "dev.ignition.analytics:designer:0.1.0",
+                    "jarName": "designer-0.1.0.jar"
+                }
+            ]
+        },
+        ":gateway": {
+            "projectPath": ":gateway",
+            "projectName": "gateway",
+            "scope": "G",
+            "artifacts": [
+                {
+                    "id": "dev.ignition.analytics:gateway:0.1.0",
+                    "jarName": "gateway-0.1.0.jar"
+                }
+            ]
+        }
+    },
+    "metaInfo": {}
+}

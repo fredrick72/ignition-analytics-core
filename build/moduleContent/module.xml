@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modules>
+	<module>
+		<name>Ignition Analytics</name>
+		<id>dev.ignition.analytics</id>
+		<version>0.1.0</version>
+		<description>Modern data analytics for Ignition: time series, statistics, anomaly detection, and forecasting.</description>
+		<license>LICENSE.html</license>
+		<requiredIgnitionVersion>8.3.0</requiredIgnitionVersion>
+		<freeModule>false</freeModule>
+		<hook scope="G">dev.ignition.analytics.gateway.AnalyticsGatewayHook</hook>
+		<hook scope="D">dev.ignition.analytics.designer.AnalyticsDesignerHook</hook>
+		<requiredFrameworkVersion>8</requiredFrameworkVersion>
+		<jar scope="CDG">tablesaw-core-0.43.1.jar</jar>
+		<jar scope="CDG">commons-math3-3.6.1.jar</jar>
+		<jar scope="CDG">guava-30.0-jre.jar</jar>
+		<jar scope="CDG">fastutil-8.3.0.jar</jar>
+		<jar scope="CDG">RoaringBitmap-0.9.25.jar</jar>
+		<jar scope="CDG">univocity-parsers-2.8.4.jar</jar>
+		<jar scope="CDG">icu4j-65.1.jar</jar>
+		<jar scope="CDG">classgraph-4.8.60.jar</jar>
+		<jar scope="CDG">slf4j-api-1.7.30.jar</jar>
+		<jar scope="CDG">failureaccess-1.0.1.jar</jar>
+		<jar scope="CDG">listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar</jar>
+		<jar scope="CDG">jsr305-3.0.2.jar</jar>
+		<jar scope="CDG">checker-qual-3.5.0.jar</jar>
+		<jar scope="CDG">error_prone_annotations-2.3.4.jar</jar>
+		<jar scope="CDG">j2objc-annotations-1.3.jar</jar>
+		<jar scope="CDG">shims-0.9.25.jar</jar>
+		<jar scope="CDG">common-0.1.0.jar</jar>
+		<jar scope="D">designer-0.1.0.jar</jar>
+		<jar scope="G">gateway-0.1.0.jar</jar>
+	</module>
+</modules>

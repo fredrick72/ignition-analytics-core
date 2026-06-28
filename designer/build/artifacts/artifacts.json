@@ -1,0 +1,11 @@
+{
+    "projectPath": ":designer",
+    "projectName": "designer",
+    "scope": "D",
+    "artifacts": [
+        {
+            "id": "dev.ignition.analytics:designer:0.1.0",
+            "jarName": "designer-0.1.0.jar"
+        }
+    ]
+}

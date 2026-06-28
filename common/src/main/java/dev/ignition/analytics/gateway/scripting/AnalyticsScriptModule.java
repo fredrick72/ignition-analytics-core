@@ -1,0 +1,305 @@
+package dev.ignition.analytics.gateway.scripting;
+
+import com.inductiveautomation.ignition.common.Dataset;
+import dev.ignition.analytics.gateway.anomaly.AnomalyDetector;
+import dev.ignition.analytics.gateway.forecast.Forecaster;
+import dev.ignition.analytics.gateway.stats.StatisticsEngine;
+import dev.ignition.analytics.gateway.timeseries.TimeSeriesAnalyzer;
+import dev.ignition.analytics.gateway.util.DatasetConverter;
+import tech.tablesaw.api.Table;
+
+import java.io.StringWriter;
+
+/**
+ * Scripting functions exposed as {@code system.analytics.*} in Ignition Jython.
+ *
+ * All methods accept and return standard Ignition {@link Dataset} objects so
+ * they integrate directly with {@code system.tag.queryTagHistory()} output and
+ * the rest of the Ignition scripting API.
+ *
+ * <h3>Typical workflow</h3>
+ * <pre>
+ *   tagData  = system.tag.queryTagHistory(
+ *                  paths=["[default]Reactor/Temperature"],
+ *                  startDate=system.date.addHours(system.date.now(), -24),
+ *                  endDate=system.date.now(),
+ *                  returnSize=0)
+ *
+ *   # Downsample to 1-hour means
+ *   hourly   = system.analytics.resample(tagData, "1h", "mean")
+ *
+ *   # Fill any gaps with linear interpolation
+ *   clean    = system.analytics.interpolate(hourly, "linear")
+ *
+ *   # Flag anomalies using z-score
+ *   flagged  = system.analytics.detectAnomaliesZScore(clean, "Temperature", 3.0)
+ *
+ *   # 24-hour forecast
+ *   forecast = system.analytics.forecast(clean, "Temperature", 24, "1h")
+ * </pre>
+ */
+public class AnalyticsScriptModule {
+
+    // =========================================================================
+    // Time series — resampling and interpolation
+    // =========================================================================
+
+    /**
+     * Resample a tag history Dataset to a fixed time interval.
+     *
+     * @param dataset     Ignition Dataset (must contain a Date timestamp column, e.g. t_stamp)
+     * @param intervalStr resampling interval: "1m", "5m", "15m", "30m", "1h", "4h", "1d"
+     * @param aggregation aggregation function: "mean", "min", "max", "sum", "first", "last"
+     * @return resampled Dataset at the new frequency
+     */
+    public Dataset resample(Dataset dataset, String intervalStr, String aggregation) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = TimeSeriesAnalyzer.resample(table, intervalStr, aggregation);
+        return DatasetConverter.toDataset(result);
+    }
+
+    /**
+     * Interpolate missing values in all numeric columns.
+     *
+     * @param dataset Ignition Dataset
+     * @param method  "linear" (default), "forward" (last-observation-carried-forward),
+     *                or "backward"
+     * @return Dataset with missing values filled
+     */
+    public Dataset interpolate(Dataset dataset, String method) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = TimeSeriesAnalyzer.interpolate(table, method);
+        return DatasetConverter.toDataset(result);
+    }
+
+    /**
+     * Drop all rows where any numeric column contains a missing value.
+     */
+    public Dataset dropNulls(Dataset dataset) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = TimeSeriesAnalyzer.dropNulls(table);
+        return DatasetConverter.toDataset(result);
+    }
+
+    /**
+     * Replace missing values in a single column with a constant.
+     *
+     * @param dataset   Ignition Dataset
+     * @param column    column name
+     * @param fillValue replacement value
+     */
+    public Dataset fillNulls(Dataset dataset, String column, double fillValue) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = TimeSeriesAnalyzer.fillNulls(table, column, fillValue);
+        return DatasetConverter.toDataset(result);
+    }
+
+    // =========================================================================
+    // Rolling / windowed statistics
+    // =========================================================================
+
+    /**
+     * Add a rolling mean column to the Dataset.
+     *
+     * @param dataset Ignition Dataset
+     * @param column  numeric column to compute over
+     * @param window  window size in rows
+     * @return original Dataset plus a new column named {@code column}_rollMean
+     */
+    public Dataset rollingMean(Dataset dataset, String column, int window) {
+        Table table = DatasetConverter.toTable(dataset);
+        return DatasetConverter.toDataset(TimeSeriesAnalyzer.rollingMean(table, column, window));
+    }
+
+    /** Add a rolling standard deviation column. */
+    public Dataset rollingStd(Dataset dataset, String column, int window) {
+        Table table = DatasetConverter.toTable(dataset);
+        return DatasetConverter.toDataset(TimeSeriesAnalyzer.rollingStd(table, column, window));
+    }
+
+    /** Add a rolling minimum column. */
+    public Dataset rollingMin(Dataset dataset, String column, int window) {
+        Table table = DatasetConverter.toTable(dataset);
+        return DatasetConverter.toDataset(TimeSeriesAnalyzer.rollingMin(table, column, window));
+    }
+
+    /** Add a rolling maximum column. */
+    public Dataset rollingMax(Dataset dataset, String column, int window) {
+        Table table = DatasetConverter.toTable(dataset);
+        return DatasetConverter.toDataset(TimeSeriesAnalyzer.rollingMax(table, column, window));
+    }
+
+    // =========================================================================
+    // Descriptive statistics
+    // =========================================================================
+
+    /**
+     * Compute descriptive statistics for all numeric columns.
+     * Returns a Dataset with rows for count, mean, std, min, 25%, 50%, 75%, max.
+     */
+    public Dataset describe(Dataset dataset) {
+        Table table = DatasetConverter.toTable(dataset);
+        return StatisticsEngine.describe(table);
+    }
+
+    /**
+     * Compute the Pearson correlation matrix for all numeric columns.
+     * Returns a Dataset where the first column is the row label and the
+     * remaining columns are correlation coefficients.
+     */
+    public Dataset correlate(Dataset dataset) {
+        Table table = DatasetConverter.toTable(dataset);
+        return StatisticsEngine.correlate(table);
+    }
+
+    /**
+     * Normalize a column in a copy of the Dataset.
+     *
+     * @param dataset Ignition Dataset
+     * @param column  column to normalize
+     * @param method  "minmax" (scale to [0, 1]) or "zscore" (mean=0, std=1)
+     */
+    public Dataset normalize(Dataset dataset, String column, String method) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = StatisticsEngine.normalize(table, column, method);
+        return DatasetConverter.toDataset(result);
+    }
+
+    // =========================================================================
+    // Anomaly detection
+    // =========================================================================
+
+    /**
+     * Detect anomalies using a Z-score threshold.
+     * Appends a boolean column named {@code column}_anomaly.
+     *
+     * @param dataset   Ignition Dataset
+     * @param column    numeric column to analyse
+     * @param threshold sigma threshold (2.0 = sensitive, 3.0 = standard, 4.0 = conservative)
+     */
+    public Dataset detectAnomaliesZScore(Dataset dataset, String column, double threshold) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = AnomalyDetector.zScore(table, column, threshold);
+        return DatasetConverter.toDataset(result);
+    }
+
+    /**
+     * Detect anomalies using the Interquartile Range method (Tukey fences).
+     * Appends a boolean column named {@code column}_anomaly.
+     *
+     * @param dataset Ignition Dataset
+     * @param column  numeric column to analyse
+     * @param fence   IQR multiplier (1.5 = mild outliers, 3.0 = extreme outliers)
+     */
+    public Dataset detectAnomaliesIQR(Dataset dataset, String column, double fence) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = AnomalyDetector.iqr(table, column, fence);
+        return DatasetConverter.toDataset(result);
+    }
+
+    /**
+     * Detect anomalies using an EWMA control chart.
+     * Suitable for slowly drifting processes where Z-score misses shifts.
+     * Appends a boolean column named {@code column}_anomaly.
+     *
+     * @param dataset   Ignition Dataset
+     * @param column    numeric column to analyse
+     * @param lambda    EWMA smoothing factor (0 < lambda ≤ 1; typical: 0.2)
+     * @param threshold control limit in sigma units (typical: 3.0)
+     */
+    public Dataset detectAnomaliesEWMA(Dataset dataset, String column, double lambda, double threshold) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = AnomalyDetector.ewma(table, column, lambda, threshold);
+        return DatasetConverter.toDataset(result);
+    }
+
+    // =========================================================================
+    // Forecasting
+    // =========================================================================
+
+    /**
+     * Forecast future values using Holt's double exponential smoothing.
+     * Returns a new Dataset containing only the forecasted rows — append to
+     * the original for a full historical + forecast view.
+     *
+     * @param dataset     Ignition Dataset (must have a timestamp column)
+     * @param column      numeric column to forecast
+     * @param periods     number of future steps to generate
+     * @param intervalStr step size: "1m", "5m", "1h", "1d"
+     * @return Dataset with {@code periods} rows of forecasted timestamps and values
+     */
+    public Dataset forecast(Dataset dataset, String column, int periods, String intervalStr) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = Forecaster.forecast(table, column, periods, intervalStr);
+        return DatasetConverter.toDataset(result);
+    }
+
+    /**
+     * Forecast using simple linear extrapolation (ordinary least squares trend line).
+     * Best for data with a clear monotonic trend and no complex seasonality.
+     */
+    public Dataset forecastLinear(Dataset dataset, String column, int periods, String intervalStr) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = Forecaster.linear(table, column, periods, intervalStr);
+        return DatasetConverter.toDataset(result);
+    }
+
+    /**
+     * Forecast using Holt's method with explicit smoothing parameters.
+     *
+     * @param alpha level smoothing factor (0 < alpha < 1; lower = smoother)
+     * @param beta  trend smoothing factor (0 < beta < 1)
+     */
+    public Dataset forecastHolt(
+        Dataset dataset, String column, int periods, String intervalStr,
+        double alpha, double beta
+    ) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = Forecaster.holt(table, column, periods, intervalStr, alpha, beta);
+        return DatasetConverter.toDataset(result);
+    }
+
+    // =========================================================================
+    // Export
+    // =========================================================================
+
+    /**
+     * Serialize the Dataset to a CSV string.
+     * Useful for writing to the file system or returning to a report.
+     */
+    public String toCSV(Dataset dataset) {
+        Table table = DatasetConverter.toTable(dataset);
+        return table.write().toString("csv");
+    }
+
+    /**
+     * Serialize the Dataset to a JSON array-of-objects string.
+     */
+    public String toJSON(Dataset dataset) {
+        Table table = DatasetConverter.toTable(dataset);
+        // Tablesaw's JSON writer produces an array of row objects
+        return table.write().toString("json");
+    }
+
+    // =========================================================================
+    // Utility / introspection
+    // =========================================================================
+
+    /**
+     * Return the shape of a Dataset as a two-element integer array: [rows, columns].
+     */
+    public int[] shape(Dataset dataset) {
+        return new int[] {dataset.getRowCount(), dataset.getColumnCount()};
+    }
+
+    /**
+     * Return the column names of the Dataset as a String array.
+     */
+    public String[] columnNames(Dataset dataset) {
+        String[] names = new String[dataset.getColumnCount()];
+        for (int i = 0; i < names.length; i++) {
+            names[i] = dataset.getColumnName(i);
+        }
+        return names;
+    }
+}

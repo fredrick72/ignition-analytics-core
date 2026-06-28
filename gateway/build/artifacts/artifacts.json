@@ -1,0 +1,11 @@
+{
+    "projectPath": ":gateway",
+    "projectName": "gateway",
+    "scope": "G",
+    "artifacts": [
+        {
+            "id": "dev.ignition.analytics:gateway:0.1.0",
+            "jarName": "gateway-0.1.0.jar"
+        }
+    ]
+}
