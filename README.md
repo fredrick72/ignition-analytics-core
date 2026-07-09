@@ -136,4 +136,4 @@ See [docs/scripting-api.md](docs/scripting-api.md) for the full function referen
 
 ## License
 
-Copyright © 2026. See [LICENSE.html](LICENSE.html).
+Apache License 2.0 — see [LICENSE](LICENSE) (and [NOTICE](NOTICE) for third-party attributions).

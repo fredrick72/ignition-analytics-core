@@ -4,11 +4,11 @@
     "moduleDescription": "Modern data analytics for Ignition: time series, statistics, anomaly detection, and forecasting.",
     "version": "0.1.0",
     "checksum": {
-        "checksum": "d2d955a59e731f0f2dca302da33b651f10e17ee8e2e156669e9e8b956f8670e0",
+        "checksum": "f8fbb68d673c705ed7b4d450a7bd4aaa0858bac077ad700c5342dd992db3f126",
         "algorithm": "SHA256"
     },
     "fileName": "ignition-analytics.unsigned.modl",
-    "fileSize": 35560402,
+    "fileSize": 36850667,
     "artifacts": {
         ":common": {
             "projectPath": ":common",
@@ -22,6 +22,10 @@
                 {
                     "id": "commons-math3-3.6.1.jar (org.apache.commons:commons-math3:3.6.1)",
                     "jarName": "commons-math3-3.6.1.jar"
+                },
+                {
+                    "id": "smile-core-2.6.0.jar (com.github.haifengl:smile-core:2.6.0)",
+                    "jarName": "smile-core-2.6.0.jar"
                 },
                 {
                     "id": "guava-30.0-jre.jar (com.google.guava:guava:30.0-jre)",
@@ -46,6 +50,18 @@
                 {
                     "id": "classgraph-4.8.60.jar (io.github.classgraph:classgraph:4.8.60)",
                     "jarName": "classgraph-4.8.60.jar"
+                },
+                {
+                    "id": "smile-data-2.6.0.jar (com.github.haifengl:smile-data:2.6.0)",
+                    "jarName": "smile-data-2.6.0.jar"
+                },
+                {
+                    "id": "smile-graph-2.6.0.jar (com.github.haifengl:smile-graph:2.6.0)",
+                    "jarName": "smile-graph-2.6.0.jar"
+                },
+                {
+                    "id": "smile-math-2.6.0.jar (com.github.haifengl:smile-math:2.6.0)",
+                    "jarName": "smile-math-2.6.0.jar"
                 },
                 {
                     "id": "slf4j-api-1.7.30.jar (org.slf4j:slf4j-api:1.7.30)",

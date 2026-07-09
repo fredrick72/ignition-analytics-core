@@ -1,0 +1,14 @@
+Ignition Analytics
+Copyright 2026 Ignition Analytics contributors
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.
+
+This product bundles the following third-party software, each licensed
+under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0):
+
+  * Tablesaw (https://github.com/jtablesaw/tablesaw)
+  * Apache Commons Math (https://commons.apache.org/proper/commons-math/)
+    Copyright 2001-2016 The Apache Software Foundation
+  * SMILE (https://haifengl.github.io/)
+    Copyright 2010-2021 Haifeng Li

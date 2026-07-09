@@ -12,6 +12,10 @@
             "jarName": "commons-math3-3.6.1.jar"
         },
         {
+            "id": "smile-core-2.6.0.jar (com.github.haifengl:smile-core:2.6.0)",
+            "jarName": "smile-core-2.6.0.jar"
+        },
+        {
             "id": "guava-30.0-jre.jar (com.google.guava:guava:30.0-jre)",
             "jarName": "guava-30.0-jre.jar"
         },
@@ -34,6 +38,18 @@
         {
             "id": "classgraph-4.8.60.jar (io.github.classgraph:classgraph:4.8.60)",
             "jarName": "classgraph-4.8.60.jar"
+        },
+        {
+            "id": "smile-data-2.6.0.jar (com.github.haifengl:smile-data:2.6.0)",
+            "jarName": "smile-data-2.6.0.jar"
+        },
+        {
+            "id": "smile-graph-2.6.0.jar (com.github.haifengl:smile-graph:2.6.0)",
+            "jarName": "smile-graph-2.6.0.jar"
+        },
+        {
+            "id": "smile-math-2.6.0.jar (com.github.haifengl:smile-math:2.6.0)",
+            "jarName": "smile-math-2.6.0.jar"
         },
         {
             "id": "slf4j-api-1.7.30.jar (org.slf4j:slf4j-api:1.7.30)",

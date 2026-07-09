@@ -13,12 +13,16 @@
 		<requiredFrameworkVersion>8</requiredFrameworkVersion>
 		<jar scope="CDG">tablesaw-core-0.43.1.jar</jar>
 		<jar scope="CDG">commons-math3-3.6.1.jar</jar>
+		<jar scope="CDG">smile-core-2.6.0.jar</jar>
 		<jar scope="CDG">guava-30.0-jre.jar</jar>
 		<jar scope="CDG">fastutil-8.3.0.jar</jar>
 		<jar scope="CDG">RoaringBitmap-0.9.25.jar</jar>
 		<jar scope="CDG">univocity-parsers-2.8.4.jar</jar>
 		<jar scope="CDG">icu4j-65.1.jar</jar>
 		<jar scope="CDG">classgraph-4.8.60.jar</jar>
+		<jar scope="CDG">smile-data-2.6.0.jar</jar>
+		<jar scope="CDG">smile-graph-2.6.0.jar</jar>
+		<jar scope="CDG">smile-math-2.6.0.jar</jar>
 		<jar scope="CDG">slf4j-api-1.7.30.jar</jar>
 		<jar scope="CDG">failureaccess-1.0.1.jar</jar>
 		<jar scope="CDG">listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar</jar>
