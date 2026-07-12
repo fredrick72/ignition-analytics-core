@@ -18,7 +18,7 @@ Ignition's scripting engine runs Jython (Python 2.7 on the JVM). This makes it i
 | **Correlation** | `correlate` — Pearson correlation matrix |
 | **Normalization** | `normalize` — min-max or z-score |
 | **Anomaly detection** | `detectAnomaliesZScore`, `detectAnomaliesIQR`, `detectAnomaliesEWMA` |
-| **Forecasting** | `forecast` (Holt), `forecastLinear`, `forecastHolt` |
+| **Forecasting** | `forecast` (Holt), `forecastLinear`, `forecastHolt` — no seasonal term; see [known limitations](docs/forecast-limitations.md) before using on cyclical data |
 | **Machine learning** | `cluster` (K-Means), `pca` (Principal Component Analysis) |
 | **Export** | `toCSV`, `toJSON` |
 | **Introspection** | `shape`, `columnNames` |
