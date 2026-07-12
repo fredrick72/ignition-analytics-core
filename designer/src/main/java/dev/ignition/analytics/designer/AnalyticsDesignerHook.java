@@ -1,6 +1,7 @@
 package dev.ignition.analytics.designer;
 
 import com.inductiveautomation.ignition.common.script.ScriptManager;
+import com.inductiveautomation.ignition.common.script.hints.PropertiesFileDocProvider;
 import com.inductiveautomation.ignition.designer.model.AbstractDesignerModuleHook;
 import dev.ignition.analytics.common.ModuleConstants;
 import dev.ignition.analytics.gateway.scripting.AnalyticsScriptModule;
@@ -16,7 +17,8 @@ public class AnalyticsDesignerHook extends AbstractDesignerModuleHook {
         super.initializeScriptManager(manager);
         manager.addScriptModule(
             ModuleConstants.SCRIPT_NAMESPACE,
-            new AnalyticsScriptModule()
+            new AnalyticsScriptModule(),
+            new PropertiesFileDocProvider()
         );
     }
 }
