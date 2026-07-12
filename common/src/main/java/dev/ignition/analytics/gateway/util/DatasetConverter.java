@@ -50,7 +50,8 @@ public final class DatasetConverter {
 
         String[] colNames = new String[numCols];
         Class<?>[] colTypes = new Class<?>[numCols];
-        Object[][] data = new Object[numRows][numCols];
+        // BasicDataset.getValueAt(row, col) indexes as data[col][row] — column-major.
+        Object[][] data = new Object[numCols][numRows];
 
         for (int c = 0; c < numCols; c++) {
             Column<?> col = table.column(c);
@@ -135,40 +136,40 @@ public final class DatasetConverter {
             DoubleColumn dc = (DoubleColumn) col;
             colTypes[colIdx] = Double.class;
             for (int r = 0; r < numRows; r++) {
-                data[r][colIdx] = dc.isMissing(r) ? null : dc.get(r);
+                data[colIdx][r] = dc.isMissing(r) ? null : dc.get(r);
             }
         } else if (col instanceof LongColumn) {
             LongColumn lc = (LongColumn) col;
             colTypes[colIdx] = Long.class;
             for (int r = 0; r < numRows; r++) {
-                data[r][colIdx] = lc.isMissing(r) ? null : lc.get(r);
+                data[colIdx][r] = lc.isMissing(r) ? null : lc.get(r);
             }
         } else if (col instanceof IntColumn) {
             IntColumn ic = (IntColumn) col;
             colTypes[colIdx] = Integer.class;
             for (int r = 0; r < numRows; r++) {
-                data[r][colIdx] = ic.isMissing(r) ? null : ic.get(r);
+                data[colIdx][r] = ic.isMissing(r) ? null : ic.get(r);
             }
         } else if (col instanceof DateTimeColumn) {
             DateTimeColumn dtc = (DateTimeColumn) col;
             colTypes[colIdx] = Date.class;
             for (int r = 0; r < numRows; r++) {
                 if (dtc.isMissing(r)) {
-                    data[r][colIdx] = null;
+                    data[colIdx][r] = null;
                 } else {
-                    data[r][colIdx] = Date.from(dtc.get(r).toInstant(ZoneOffset.UTC));
+                    data[colIdx][r] = Date.from(dtc.get(r).toInstant(ZoneOffset.UTC));
                 }
             }
         } else if (col instanceof BooleanColumn) {
             BooleanColumn bc = (BooleanColumn) col;
             colTypes[colIdx] = Boolean.class;
             for (int r = 0; r < numRows; r++) {
-                data[r][colIdx] = bc.isMissing(r) ? null : bc.get(r);
+                data[colIdx][r] = bc.isMissing(r) ? null : bc.get(r);
             }
         } else {
             colTypes[colIdx] = String.class;
             for (int r = 0; r < numRows; r++) {
-                data[r][colIdx] = col.isMissing(r) ? null : col.getString(r);
+                data[colIdx][r] = col.isMissing(r) ? null : col.getString(r);
             }
         }
     }
