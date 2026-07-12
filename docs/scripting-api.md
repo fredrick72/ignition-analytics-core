@@ -267,6 +267,8 @@ flagged = system.analytics.detectAnomaliesEWMA(tagData, "Temperature", 0.2, 3.0)
 
 Forecast functions return a **new Dataset** containing only the forecasted rows — not the original historical rows. Append to the original for a full historical + forecast view.
 
+> **Seasonal data warning:** `forecast`/`forecastHolt` have no seasonal term — on cyclical data (daily/weekly tag patterns) they lock onto the local slope at the training cutoff and extrapolate it linearly, producing error that grows unbounded with both seasonal amplitude and forecast horizon. `forecastLinear` and `forecastHolt`/`forecast` are both reliable on trend-only (with or without noise) data. See [forecast-limitations.md](forecast-limitations.md) for the measured error characteristics and recommendations.
+
 ### `forecast(dataset, column, periods, interval)`
 
 Forecast using Holt's double exponential smoothing (handles trend, no seasonality). Uses default smoothing parameters (`alpha=0.3`, `beta=0.1`).
