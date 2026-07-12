@@ -1,6 +1,9 @@
 package dev.ignition.analytics.gateway.scripting;
 
+import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.Dataset;
+import com.inductiveautomation.ignition.common.script.hints.JythonElement;
+import com.inductiveautomation.ignition.common.script.hints.ScriptArg;
 import dev.ignition.analytics.gateway.anomaly.AnomalyDetector;
 import dev.ignition.analytics.gateway.forecast.Forecaster;
 import dev.ignition.analytics.gateway.ml.MLEngine;
@@ -41,6 +44,16 @@ import java.io.StringWriter;
  */
 public class AnalyticsScriptModule {
 
+    private static final String DOC_BUNDLE_PREFIX = "AnalyticsScriptModule";
+
+    static {
+        BundleUtil.get().addBundle(
+            AnalyticsScriptModule.class.getSimpleName(),
+            AnalyticsScriptModule.class.getClassLoader(),
+            AnalyticsScriptModule.class.getName().replace('.', '/')
+        );
+    }
+
     // =========================================================================
     // Time series — resampling and interpolation
     // =========================================================================
@@ -53,7 +66,12 @@ public class AnalyticsScriptModule {
      * @param aggregation aggregation function: "mean", "min", "max", "sum", "first", "last"
      * @return resampled Dataset at the new frequency
      */
-    public Dataset resample(Dataset dataset, String intervalStr, String aggregation) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset resample(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("intervalStr") String intervalStr,
+        @ScriptArg("aggregation") String aggregation
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = TimeSeriesAnalyzer.resample(table, intervalStr, aggregation);
         return DatasetConverter.toDataset(result);
@@ -67,7 +85,11 @@ public class AnalyticsScriptModule {
      *                or "backward"
      * @return Dataset with missing values filled
      */
-    public Dataset interpolate(Dataset dataset, String method) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset interpolate(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("method") String method
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = TimeSeriesAnalyzer.interpolate(table, method);
         return DatasetConverter.toDataset(result);
@@ -76,7 +98,8 @@ public class AnalyticsScriptModule {
     /**
      * Drop all rows where any numeric column contains a missing value.
      */
-    public Dataset dropNulls(Dataset dataset) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset dropNulls(@ScriptArg("dataset") Dataset dataset) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = TimeSeriesAnalyzer.dropNulls(table);
         return DatasetConverter.toDataset(result);
@@ -89,7 +112,12 @@ public class AnalyticsScriptModule {
      * @param column    column name
      * @param fillValue replacement value
      */
-    public Dataset fillNulls(Dataset dataset, String column, double fillValue) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset fillNulls(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("fillValue") double fillValue
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = TimeSeriesAnalyzer.fillNulls(table, column, fillValue);
         return DatasetConverter.toDataset(result);
@@ -107,25 +135,45 @@ public class AnalyticsScriptModule {
      * @param window  window size in rows
      * @return original Dataset plus a new column named {@code column}_rollMean
      */
-    public Dataset rollingMean(Dataset dataset, String column, int window) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset rollingMean(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("window") int window
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         return DatasetConverter.toDataset(TimeSeriesAnalyzer.rollingMean(table, column, window));
     }
 
     /** Add a rolling standard deviation column. */
-    public Dataset rollingStd(Dataset dataset, String column, int window) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset rollingStd(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("window") int window
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         return DatasetConverter.toDataset(TimeSeriesAnalyzer.rollingStd(table, column, window));
     }
 
     /** Add a rolling minimum column. */
-    public Dataset rollingMin(Dataset dataset, String column, int window) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset rollingMin(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("window") int window
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         return DatasetConverter.toDataset(TimeSeriesAnalyzer.rollingMin(table, column, window));
     }
 
     /** Add a rolling maximum column. */
-    public Dataset rollingMax(Dataset dataset, String column, int window) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset rollingMax(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("window") int window
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         return DatasetConverter.toDataset(TimeSeriesAnalyzer.rollingMax(table, column, window));
     }
@@ -138,7 +186,8 @@ public class AnalyticsScriptModule {
      * Compute descriptive statistics for all numeric columns.
      * Returns a Dataset with rows for count, mean, std, min, 25%, 50%, 75%, max.
      */
-    public Dataset describe(Dataset dataset) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset describe(@ScriptArg("dataset") Dataset dataset) {
         Table table = DatasetConverter.toTable(dataset);
         return StatisticsEngine.describe(table);
     }
@@ -148,7 +197,8 @@ public class AnalyticsScriptModule {
      * Returns a Dataset where the first column is the row label and the
      * remaining columns are correlation coefficients.
      */
-    public Dataset correlate(Dataset dataset) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset correlate(@ScriptArg("dataset") Dataset dataset) {
         Table table = DatasetConverter.toTable(dataset);
         return StatisticsEngine.correlate(table);
     }
@@ -160,7 +210,12 @@ public class AnalyticsScriptModule {
      * @param column  column to normalize
      * @param method  "minmax" (scale to [0, 1]) or "zscore" (mean=0, std=1)
      */
-    public Dataset normalize(Dataset dataset, String column, String method) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset normalize(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("method") String method
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = StatisticsEngine.normalize(table, column, method);
         return DatasetConverter.toDataset(result);
@@ -178,7 +233,12 @@ public class AnalyticsScriptModule {
      * @param column    numeric column to analyse
      * @param threshold sigma threshold (2.0 = sensitive, 3.0 = standard, 4.0 = conservative)
      */
-    public Dataset detectAnomaliesZScore(Dataset dataset, String column, double threshold) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset detectAnomaliesZScore(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("threshold") double threshold
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = AnomalyDetector.zScore(table, column, threshold);
         return DatasetConverter.toDataset(result);
@@ -192,7 +252,12 @@ public class AnalyticsScriptModule {
      * @param column  numeric column to analyse
      * @param fence   IQR multiplier (1.5 = mild outliers, 3.0 = extreme outliers)
      */
-    public Dataset detectAnomaliesIQR(Dataset dataset, String column, double fence) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset detectAnomaliesIQR(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("fence") double fence
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = AnomalyDetector.iqr(table, column, fence);
         return DatasetConverter.toDataset(result);
@@ -208,7 +273,13 @@ public class AnalyticsScriptModule {
      * @param lambda    EWMA smoothing factor (0 < lambda ≤ 1; typical: 0.2)
      * @param threshold control limit in sigma units (typical: 3.0)
      */
-    public Dataset detectAnomaliesEWMA(Dataset dataset, String column, double lambda, double threshold) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset detectAnomaliesEWMA(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("lambda") double lambda,
+        @ScriptArg("threshold") double threshold
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = AnomalyDetector.ewma(table, column, lambda, threshold);
         return DatasetConverter.toDataset(result);
@@ -229,7 +300,13 @@ public class AnalyticsScriptModule {
      * @param intervalStr step size: "1m", "5m", "1h", "1d"
      * @return Dataset with {@code periods} rows of forecasted timestamps and values
      */
-    public Dataset forecast(Dataset dataset, String column, int periods, String intervalStr) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset forecast(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("periods") int periods,
+        @ScriptArg("intervalStr") String intervalStr
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = Forecaster.forecast(table, column, periods, intervalStr);
         return DatasetConverter.toDataset(result);
@@ -239,7 +316,13 @@ public class AnalyticsScriptModule {
      * Forecast using simple linear extrapolation (ordinary least squares trend line).
      * Best for data with a clear monotonic trend and no complex seasonality.
      */
-    public Dataset forecastLinear(Dataset dataset, String column, int periods, String intervalStr) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset forecastLinear(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("periods") int periods,
+        @ScriptArg("intervalStr") String intervalStr
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = Forecaster.linear(table, column, periods, intervalStr);
         return DatasetConverter.toDataset(result);
@@ -251,9 +334,14 @@ public class AnalyticsScriptModule {
      * @param alpha level smoothing factor (0 < alpha < 1; lower = smoother)
      * @param beta  trend smoothing factor (0 < beta < 1)
      */
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
     public Dataset forecastHolt(
-        Dataset dataset, String column, int periods, String intervalStr,
-        double alpha, double beta
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("periods") int periods,
+        @ScriptArg("intervalStr") String intervalStr,
+        @ScriptArg("alpha") double alpha,
+        @ScriptArg("beta") double beta
     ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = Forecaster.holt(table, column, periods, intervalStr, alpha, beta);
@@ -276,7 +364,12 @@ public class AnalyticsScriptModule {
      * @param k       number of clusters
      * @return Dataset with the original columns plus a "cluster" integer column
      */
-    public Dataset cluster(Dataset dataset, String[] columns, int k) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset cluster(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("columns") String[] columns,
+        @ScriptArg("k") int k
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = MLEngine.kmeans(table, columns, k);
         return DatasetConverter.toDataset(result);
@@ -295,7 +388,12 @@ public class AnalyticsScriptModule {
      * @param nComponents number of principal components to retain (1 ≤ n ≤ columns.length)
      * @return Dataset with original columns plus "PC_1" … "PC_n" columns
      */
-    public Dataset pca(Dataset dataset, String[] columns, int nComponents) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset pca(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("columns") String[] columns,
+        @ScriptArg("nComponents") int nComponents
+    ) {
         Table table = DatasetConverter.toTable(dataset);
         Table result = MLEngine.pca(table, columns, nComponents);
         return DatasetConverter.toDataset(result);
@@ -309,7 +407,8 @@ public class AnalyticsScriptModule {
      * Serialize the Dataset to a CSV string.
      * Useful for writing to the file system or returning to a report.
      */
-    public String toCSV(Dataset dataset) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public String toCSV(@ScriptArg("dataset") Dataset dataset) {
         Table table = DatasetConverter.toTable(dataset);
         return table.write().toString("csv");
     }
@@ -317,7 +416,8 @@ public class AnalyticsScriptModule {
     /**
      * Serialize the Dataset to a JSON array-of-objects string.
      */
-    public String toJSON(Dataset dataset) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public String toJSON(@ScriptArg("dataset") Dataset dataset) {
         Table table = DatasetConverter.toTable(dataset);
         // Tablesaw's JSON writer produces an array of row objects
         return table.write().toString("json");
@@ -330,14 +430,16 @@ public class AnalyticsScriptModule {
     /**
      * Return the shape of a Dataset as a two-element integer array: [rows, columns].
      */
-    public int[] shape(Dataset dataset) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public int[] shape(@ScriptArg("dataset") Dataset dataset) {
         return new int[] {dataset.getRowCount(), dataset.getColumnCount()};
     }
 
     /**
      * Return the column names of the Dataset as a String array.
      */
-    public String[] columnNames(Dataset dataset) {
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public String[] columnNames(@ScriptArg("dataset") Dataset dataset) {
         String[] names = new String[dataset.getColumnCount()];
         for (int i = 0; i < names.length; i++) {
             names[i] = dataset.getColumnName(i);

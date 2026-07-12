@@ -2,6 +2,7 @@ package dev.ignition.analytics.gateway;
 
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
 import com.inductiveautomation.ignition.common.script.ScriptManager;
+import com.inductiveautomation.ignition.common.script.hints.PropertiesFileDocProvider;
 import com.inductiveautomation.ignition.gateway.model.AbstractGatewayModuleHook;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import dev.ignition.analytics.common.ModuleConstants;
@@ -40,7 +41,8 @@ public class AnalyticsGatewayHook extends AbstractGatewayModuleHook {
         scriptModule = new AnalyticsScriptModule();
         manager.addScriptModule(
             ModuleConstants.SCRIPT_NAMESPACE,
-            scriptModule
+            scriptModule,
+            new PropertiesFileDocProvider()
         );
 
         log.info("Registered scripting namespace: {}", ModuleConstants.SCRIPT_NAMESPACE);
