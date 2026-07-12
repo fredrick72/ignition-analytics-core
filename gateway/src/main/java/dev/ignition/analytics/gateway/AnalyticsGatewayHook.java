@@ -1,6 +1,7 @@
 package dev.ignition.analytics.gateway;
 
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
+import com.inductiveautomation.ignition.common.script.ScriptManager;
 import com.inductiveautomation.ignition.gateway.model.AbstractGatewayModuleHook;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import dev.ignition.analytics.common.ModuleConstants;
@@ -30,10 +31,14 @@ public class AnalyticsGatewayHook extends AbstractGatewayModuleHook {
     @Override
     public void startup(LicenseState licenseState) {
         log.info("Starting Ignition Analytics module v{}", getVersion());
+    }
+
+    @Override
+    public void initializeScriptManager(ScriptManager manager) {
+        super.initializeScriptManager(manager);
 
         scriptModule = new AnalyticsScriptModule();
-
-        context.getScriptManager().addScriptModule(
+        manager.addScriptModule(
             ModuleConstants.SCRIPT_NAMESPACE,
             scriptModule
         );
