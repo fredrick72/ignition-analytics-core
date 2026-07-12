@@ -1,0 +1,7 @@
+# Module signing secrets — see signing/README.md. Never commit these.
+signing/*.jks
+signing/*.p7b
+signing/*.pem
+signing/*.p12
+signing/*.pfx
+signing/signing.properties
