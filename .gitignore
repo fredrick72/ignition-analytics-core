@@ -5,3 +5,7 @@ signing/*.pem
 signing/*.p12
 signing/*.pfx
 signing/signing.properties
+
+# IDE-generated compile output (VS Code Java language server) — not used
+# by the Gradle build; the real, packaged output lives in build/.
+bin/
