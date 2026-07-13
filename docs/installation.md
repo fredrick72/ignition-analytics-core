@@ -90,7 +90,7 @@ A red status or error banner means the hook threw an exception. Check the logs n
 
 ### Step 2 — Gateway logs
 
-Open `<ignition-install>/logs/wrapper.log` and search for:
+Open `<ignition-install>/logs/wrapper.log` and search for these three lines (order can vary — `initializeScriptManager` may run before or after `startup()`):
 
 ```
 Setting up Ignition Analytics module
@@ -148,21 +148,8 @@ On the Modules page, click the **Uninstall** link next to Ignition Analytics. Th
 
 ## Signing
 
-Unsigned modules are suitable for development and internal environments where you control the gateway. For deployment to external customers or gateways with strict security policies, the module must be signed with a certificate from Inductive Automation.
+Unsigned modules are suitable for development and internal environments where you control the gateway. For deployment to a gateway that isn't in developer mode (or doesn't have unsigned modules explicitly allowed), the module must be signed.
 
-Steps to obtain a signing certificate:
+The build signs automatically, with no `build.gradle.kts` changes needed, if a `signing/signing.properties` file is present — see [signing/README.md](../signing/README.md) for how to generate your own self-signed keystore (free, takes a few minutes) or wire in a CA-issued certificate for broader distribution. Without that file, `./gradlew build` produces the unsigned `.modl` as described above.
 
-1. Create an account on the [Inductive Automation Developer Portal](https://developer.inductiveautomation.com)
-2. Submit a module signing request
-3. Once approved, configure the keystore path and credentials in `gradle.properties`:
-
-```properties
-signing.keystorePath=/path/to/keystore.jks
-signing.keystorePassword=your-password
-signing.certAlias=your-alias
-signing.certPassword=your-cert-password
-```
-
-4. Remove `skipModlSigning.set(true)` from `build.gradle.kts` and rebuild
-
-The output will be a signed `.modl` (without the `.unsigned` suffix) that can be installed on any Ignition gateway without enabling unsigned module support.
+A signed build outputs `build/ignition-analytics.modl` (no `.unsigned` suffix) and can be installed on any Ignition gateway without enabling unsigned module support.
