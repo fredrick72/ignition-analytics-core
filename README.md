@@ -102,7 +102,7 @@ gradlew.bat build        # Windows
 ls build/*.modl
 ```
 
-The build produces an **unsigned** module. Unsigned modules can be installed on any gateway in developer mode or on gateways configured to allow unsigned modules. For production deployment, see [Signing a Module](docs/signing.md).
+By default the build produces an **unsigned** module, installable on any gateway in developer mode or configured to allow unsigned modules. To produce a signed `.modl` instead, see [signing/README.md](signing/README.md) — the build detects a signing key automatically and signs with no `build.gradle.kts` changes needed.
 
 ### Project Structure
 
@@ -118,7 +118,8 @@ ignition-analytics-core/
 │       └── gateway/forecast/    Forecaster.java
 ├── gateway/         # Gateway hook — registers system.analytics in gateway scope
 ├── designer/        # Designer hook — registers system.analytics in Script Console
-├── build/           # Output — ignition-analytics.unsigned.modl
+├── signing/         # Module signing key + docs (keystore/passwords gitignored)
+├── build/           # Output — ignition-analytics.unsigned.modl, or .modl if signed
 └── docs/            # Extended documentation
 ```
 
