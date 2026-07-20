@@ -348,6 +348,36 @@ public class AnalyticsScriptModule {
         return DatasetConverter.toDataset(result);
     }
 
+    /**
+     * Forecast using Holt-Winters triple exponential smoothing (level + trend +
+     * additive seasonal component). Use for data with a repeating seasonal
+     * pattern that {@link #forecastHolt} cannot model.
+     *
+     * @param seasonalPeriods number of steps in one full seasonal cycle (e.g. 24 for
+     *                        hourly data with a daily cycle, 7 for daily data with a
+     *                        weekly cycle)
+     * @param alpha           level smoothing factor (0 < alpha < 1)
+     * @param beta            trend smoothing factor (0 < beta < 1)
+     * @param gamma           seasonal smoothing factor (0 < gamma < 1)
+     */
+    @JythonElement(docBundlePrefix = DOC_BUNDLE_PREFIX)
+    public Dataset forecastHoltWinters(
+        @ScriptArg("dataset") Dataset dataset,
+        @ScriptArg("column") String column,
+        @ScriptArg("periods") int periods,
+        @ScriptArg("intervalStr") String intervalStr,
+        @ScriptArg("seasonalPeriods") int seasonalPeriods,
+        @ScriptArg("alpha") double alpha,
+        @ScriptArg("beta") double beta,
+        @ScriptArg("gamma") double gamma
+    ) {
+        Table table = DatasetConverter.toTable(dataset);
+        Table result = Forecaster.holtWinters(
+            table, column, periods, intervalStr, seasonalPeriods, alpha, beta, gamma
+        );
+        return DatasetConverter.toDataset(result);
+    }
+
     // =========================================================================
     // Machine learning
     // =========================================================================

@@ -267,7 +267,7 @@ flagged = system.analytics.detectAnomaliesEWMA(tagData, "Temperature", 0.2, 3.0)
 
 Forecast functions return a **new Dataset** containing only the forecasted rows — not the original historical rows. Append to the original for a full historical + forecast view.
 
-> **Seasonal data warning:** `forecast`/`forecastHolt` have no seasonal term — on cyclical data (daily/weekly tag patterns) they lock onto the local slope at the training cutoff and extrapolate it linearly, producing error that grows unbounded with both seasonal amplitude and forecast horizon. `forecastLinear` and `forecastHolt`/`forecast` are both reliable on trend-only (with or without noise) data. See [forecast-limitations.md](forecast-limitations.md) for the measured error characteristics and recommendations.
+> **Seasonal data warning:** `forecast`/`forecastHolt` have no seasonal term — on cyclical data (daily/weekly tag patterns) they lock onto the local slope at the training cutoff and extrapolate it linearly, producing error that grows unbounded with both seasonal amplitude and forecast horizon. Use `forecastHoltWinters` instead for data with a repeating cycle. `forecastLinear` and `forecastHolt`/`forecast` are both reliable on trend-only (with or without noise) data. See [forecast-limitations.md](forecast-limitations.md) for the measured error characteristics and recommendations.
 
 ### `forecast(dataset, column, periods, interval)`
 
@@ -319,6 +319,26 @@ Holt's method with explicit smoothing parameters.
 # More reactive to recent trend changes
 future = system.analytics.forecastHolt(tagData, "Temperature", 12, "1h", 0.5, 0.3)
 ```
+
+---
+
+### `forecastHoltWinters(dataset, column, periods, interval, seasonalPeriods, alpha, beta, gamma)`
+
+Holt-Winters triple exponential smoothing (level + trend + additive seasonal component). Tracks a repeating seasonal pattern instead of extrapolating the local slope indefinitely like `forecastHolt`/`forecast` do.
+
+| Parameter | Type | Description |
+|---|---|---|
+| `seasonalPeriods` | Integer | Number of steps in one full seasonal cycle, e.g. `24` for hourly data with a daily cycle, `7` for daily data with a weekly cycle. Requires at least 2 full cycles of history. |
+| `alpha` | Double | Level smoothing (0 < α < 1) |
+| `beta` | Double | Trend smoothing (0 < β < 1) |
+| `gamma` | Double | Seasonal smoothing (0 < γ < 1) |
+
+```python
+# Hourly data with a 24-hour cycle
+future = system.analytics.forecastHoltWinters(tagData, "Temperature", 24, "1h", 24, 0.3, 0.1, 0.1)
+```
+
+**When to use:** Data with a real repeating cycle — daily temperature curves, weekly demand patterns. On the seasonal test case documented in [forecast-limitations.md](forecast-limitations.md) (amplitude=20, no trend, no noise) this measures MAE ≈ 0.000 versus `forecastHolt`'s MAE ≈ 42.056 for the same data. Additive seasonality only — the seasonal swing is assumed to be a roughly constant offset, not scaling with the level.
 
 ---
 
