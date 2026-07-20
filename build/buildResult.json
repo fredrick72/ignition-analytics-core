@@ -4,11 +4,11 @@
     "moduleDescription": "Modern data analytics for Ignition: time series, statistics, anomaly detection, and forecasting.",
     "version": "0.1.0",
     "checksum": {
-        "checksum": "b2868cc570400b63136ded5912efdb873a062ddd5b3599cb442229144af6b0b3",
+        "checksum": "41cc2f12edb8aa30120ba4d8dcefe9a3bc6a6d4d96746571c6f36c8c1f4a8e68",
         "algorithm": "SHA256"
     },
     "fileName": "ignition-analytics.modl",
-    "fileSize": 36868684,
+    "fileSize": 36869906,
     "artifacts": {
         ":common": {
             "projectPath": ":common",

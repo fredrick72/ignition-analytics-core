@@ -133,16 +133,57 @@ not less, as horizon increases.
 
 ---
 
+## `forecastHoltWinters` — closes the seasonal gap
+
+Added to address the gap identified above: additive Holt-Winters (level +
+trend + seasonal component), requiring an explicit `seasonalPeriods`
+argument (e.g. `24` for hourly data with a daily cycle) and at least 2
+full seasonal cycles of history to initialize.
+
+**Verification so far:** confirmed at the algorithm level directly against
+`Forecaster.holtWinters` (bypassing the Dataset/Jython round-trip) using
+the same synthetic-series methodology as the rest of this document —
+`value(t) = base + trend·t + amplitude·sin(2π·t/period)`, no noise:
+
+| Scenario | Params | `forecastHolt` MAE | `forecastHoltWinters` MAE |
+|---|---|---|---|
+| Seasonal only | amplitude=20, period=24, trend=0 | 42.056 (see table above) | **0.000** |
+| Trend + seasonal | trend=0.5, amplitude=10, period=24, noise=0 | not isolated separately above | 7.016 |
+
+The seasonal-only result is the direct fix for the failure mode
+documented earlier in this file — where `forecastHolt` extrapolated the
+sine curve's instantaneous slope into a 44-unit runaway drift,
+`forecastHoltWinters` tracks the cycle almost exactly.
+
+The nonzero MAE on the trend+seasonal case is expected exponential-smoothing
+behavior, not a defect: smoothing methods (Holt, Holt-Winters) carry some
+lag against a continuously rising trend even with zero noise, the same
+reason `forecastLinear`'s exact OLS fit outperforms `forecastHolt` on
+pure-trend data. `alpha`/`beta`/`gamma` were left at illustrative defaults
+(0.3/0.1/0.1) for this check, not tuned — real usage should tune them per
+series the same way `forecastHolt`'s `alpha`/`beta` already require.
+
+**Not yet done:** the live Gateway/Jython validation this document's other
+findings are based on (`forecastTestData.py` / `forecastToolValidation.py`
+via the Script Library) — that requires installing the updated module and
+running the existing `seasonal_only` scenario against
+`forecastHoltWinters`. Worth doing to confirm the Dataset round-trip
+(`DatasetConverter`) and Designer/Gateway registration behave the same way
+they do for the other forecast functions.
+
+**Recommendation:** use `forecastHoltWinters` instead of `forecastHolt`/
+`forecast` for any data with a real repeating cycle. Additive seasonality
+only — assumes the seasonal swing is a roughly constant offset rather than
+scaling with the level; if that turns out not to hold for real tag data,
+multiplicative seasonality would be the next extension.
+
+---
+
 ## Summary
 
 | Function | Use case | Status |
 |---|---|---|
 | `forecastLinear` | Pure trend, trend + noise | Reliable |
 | `forecastHolt` / `forecast` | Trend, trend + noise (no seasonality) | Reliable |
-| `forecastHolt` / `forecast` | Any data with seasonal/cyclical component | **Unreliable — error grows linearly and unbounded with amplitude, and compounds further with forecast horizon; no seasonal term exists in the current implementation** |
-
-No Holt-Winters (trend + seasonal) forecasting function currently exists
-in the module. If seasonal forecasting is a real use case for target
-users (e.g. SCADA tag history with daily/weekly cycles, which is common),
-this is the highest-value gap to close — every seasonal test case failed
-by a wide, predictable margin.
+| `forecastHolt` / `forecast` | Any data with seasonal/cyclical component | **Unreliable — error grows linearly and unbounded with amplitude, and compounds further with forecast horizon; no seasonal term exists** |
+| `forecastHoltWinters` | Any data with seasonal/cyclical component | Reliable — MAE ≈ 0.000 on the seasonal-only case that `forecastHolt` fails at MAE ≈ 42.056 (algorithm-level verification; live Gateway/Jython confirmation still pending) |

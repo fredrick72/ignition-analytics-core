@@ -119,6 +119,85 @@ public final class Forecaster {
     }
 
     // -------------------------------------------------------------------------
+    // Holt-Winters (triple exponential smoothing — handles trend + additive seasonality)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Additive Holt-Winters triple exponential smoothing for trend- and
+     * seasonality-aware forecasting. Unlike {@link #holt}, this tracks a
+     * repeating seasonal pattern (e.g. a daily or weekly cycle) instead of
+     * extrapolating the local slope at the training cutoff indefinitely.
+     *
+     * @param table           source table
+     * @param column          numeric column to forecast
+     * @param periods         number of future periods to generate
+     * @param intervalStr     step size: "1m", "5m", "1h", "1d"
+     * @param seasonalPeriods number of steps in one full seasonal cycle (e.g. 24 for
+     *                        hourly data with a daily cycle, 7 for daily data with a
+     *                        weekly cycle)
+     * @param alpha           level smoothing (0 < alpha < 1)
+     * @param beta            trend smoothing (0 < beta < 1)
+     * @param gamma           seasonal smoothing (0 < gamma < 1)
+     */
+    public static Table holtWinters(
+        Table table, String column, int periods, String intervalStr,
+        int seasonalPeriods, double alpha, double beta, double gamma
+    ) {
+        String tsColName = requireTimestampColumn(table);
+        DateTimeColumn tsCol = (DateTimeColumn) table.column(tsColName);
+        double[] vals = StatisticsEngine.extractDoubles(table, column);
+
+        if (seasonalPeriods < 2) {
+            throw new IllegalArgumentException("seasonalPeriods must be at least 2");
+        }
+        if (vals.length < 2 * seasonalPeriods) {
+            throw new IllegalArgumentException(
+                "Need at least 2 full seasonal cycles (2 x seasonalPeriods) of data for Holt-Winters"
+            );
+        }
+
+        // Seed level, trend, and the seasonal indices from the first two seasons
+        double season0Avg = average(vals, 0, seasonalPeriods);
+        double season1Avg = average(vals, seasonalPeriods, seasonalPeriods);
+
+        double level = season0Avg;
+        double trend = (season1Avg - season0Avg) / seasonalPeriods;
+
+        double[] seasonal = new double[seasonalPeriods];
+        for (int i = 0; i < seasonalPeriods; i++) {
+            seasonal[i] = vals[i] - season0Avg;
+        }
+
+        // Run the recurrence over every remaining observed point
+        for (int t = seasonalPeriods; t < vals.length; t++) {
+            int seasonIdx = t % seasonalPeriods;
+            double seasonalPrior = seasonal[seasonIdx];
+            double prevLevel = level;
+            double prevTrend = trend;
+
+            level = alpha * (vals[t] - seasonalPrior) + (1.0 - alpha) * (prevLevel + prevTrend);
+            trend = beta * (level - prevLevel) + (1.0 - beta) * prevTrend;
+            seasonal[seasonIdx] = gamma * (vals[t] - level) + (1.0 - gamma) * seasonalPrior;
+        }
+
+        LocalDateTime lastTs = tsCol.get(table.rowCount() - 1);
+        long intervalMinutes = parseIntervalMinutes(intervalStr);
+        int n = vals.length;
+
+        DateTimeColumn forecastTs = DateTimeColumn.create(tsColName, periods);
+        DoubleColumn forecastVals = DoubleColumn.create(column, periods);
+
+        for (int h = 1; h <= periods; h++) {
+            LocalDateTime futureTs = lastTs.plusMinutes(intervalMinutes * h);
+            int seasonIdx = (n + h - 1) % seasonalPeriods;
+            forecastTs.set(h - 1, futureTs);
+            forecastVals.set(h - 1, level + h * trend + seasonal[seasonIdx]);
+        }
+
+        return Table.create(table.name() + "_forecast", forecastTs, forecastVals);
+    }
+
+    // -------------------------------------------------------------------------
     // Convenience: auto-select method
     // -------------------------------------------------------------------------
 
@@ -133,6 +212,14 @@ public final class Forecaster {
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
+
+    private static double average(double[] vals, int start, int length) {
+        double sum = 0;
+        for (int i = start; i < start + length; i++) {
+            sum += vals[i];
+        }
+        return sum / length;
+    }
 
     private static String requireTimestampColumn(Table table) {
         return DatasetConverter.findTimestampColumn(table)
